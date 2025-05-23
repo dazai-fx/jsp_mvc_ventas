@@ -10,25 +10,23 @@ public abstract class AbstractDAOImpl {
      * Ejecuta un PreparedStatement de tipo insert.
      * @param ps de tipo insert
      * @return devuelve Optional de entero correspondiente al ID generado.
-     * @throws SQLException si hay errores en la ejecución
+     * @throws SQLException si hay errores en la ejecución o si no se insertó ninguna fila o no se generó clave.
      */
-
     protected Optional<Integer> executeInsert(PreparedStatement ps) throws SQLException {
         int rowNum = ps.executeUpdate();
 
         if (rowNum == 0) {
-            System.out.println("Ninguna fila insertada.");
+            throw new SQLException("Ninguna fila fue insertada.");
         }
 
         try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
             if (generatedKeys.next()) {
                 return Optional.of(generatedKeys.getInt(1));
             } else {
-                System.out.println("No se generó clave primaria.");
-                return Optional.empty();
+                throw new SQLException("No se generó clave primaria.");
             }
         } catch (SQLFeatureNotSupportedException e) {
-            e.printStackTrace();
+            // Si el driver no soporta claves generadas, retornamos vacío pero sin imprimir stack
             return Optional.empty();
         }
     }
@@ -36,12 +34,13 @@ public abstract class AbstractDAOImpl {
     /**
      * Ejecuta un PreparedStatement de tipo update/delete.
      * @param ps de tipo update/delete
-     * @throws SQLException si hay errores en la ejecución
+     * @throws SQLException si hay errores en la ejecución o si no se modificó ninguna fila.
      */
     protected void executeUpdate(PreparedStatement ps) throws SQLException {
         int rowNum = ps.executeUpdate();
+
         if (rowNum == 0) {
-            System.out.println("Ninguna fila modificada.");
+            throw new SQLException("Ninguna fila fue modificada.");
         }
     }
 
@@ -59,28 +58,26 @@ public abstract class AbstractDAOImpl {
      * @throws SQLException si falla la conexión
      */
     protected Connection connectDB() throws SQLException {
-        return DBConnection.getConnection();
+        Connection conn = DBConnection.getConnection();
+        if (conn == null) {
+            throw new SQLException("No se pudo obtener conexión a la base de datos.");
+        }
+        return conn;
     }
 
     /**
-     * Cierra la conexión y recursos JDBC.
+     * Cierra la conexión y recursos JDBC (no lanza excepciones).
      */
     protected void closeDb(Connection conn, Statement stmt, ResultSet rs) {
         try {
             if (rs != null) rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException ignored) { }
         try {
             if (stmt != null) stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException ignored) { }
         try {
             if (conn != null) conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException ignored) { }
     }
 
 }
