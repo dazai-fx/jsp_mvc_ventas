@@ -44,10 +44,16 @@ public abstract class AbstractDAOImpl {
         }
     }
 
+    // Usa Statement.RETURN_GENERATED_KEYS y recupera todas las claves generadas automáticamente.
     protected PreparedStatement prepareStmtGeneratedKeys(Connection conn, String query) throws SQLException {
         return conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
     }
 
+    // Especifica qué nombre(s) de columna(s) generada(s) quieres recuperar. Más controlado.
+    /*
+    * en la mayoría de los casos no es necesario usar la sobrecarga con indexNames, porque Statement.RETURN_GENERATED_KEYS
+    * ya funciona correctamente si solo tienes una clave generada (id autoincremental típico). Pero si quieres ser más explícito
+    *  o si estás usando una base de datos que lo requiera (como Oracle o PostgreSQL en ciertas configuraciones), entonces puedes usarla.*/
     protected PreparedStatement prepareStmtGeneratedKeys(Connection conn, String query, String[] indexNames) throws SQLException {
         return conn.prepareStatement(query, indexNames);
     }
