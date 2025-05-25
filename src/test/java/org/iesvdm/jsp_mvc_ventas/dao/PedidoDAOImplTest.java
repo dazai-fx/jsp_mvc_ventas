@@ -81,7 +81,7 @@ class PedidoDAOImplTest {
     void findPedidoInexistente() {
         PedidoDAOImpl pedidoDAO = new PedidoDAOImpl();
 
-        Long idInexistente = 9999L; // Aseguramos que este ID no existe
+        Long idInexistente = 9999999L; // Aseguramos que este ID no existe
 
         Optional<Pedido> pedidoOpt = pedidoDAO.find(idInexistente);
 

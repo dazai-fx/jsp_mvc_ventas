@@ -68,14 +68,21 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
                 java.sql.Date sqlDate = rs.getDate("fecha");
                 pedido.setFecha(new java.util.Date(sqlDate.getTime()));
 
-                // Suponiendo que tienes constructores vacíos y setters en Cliente y Comercial
-                Cliente cliente = new Cliente();
-                cliente.setId(rs.getLong("id_cliente"));
-                pedido.setCliente(cliente);
 
-                Comercial comercial = new Comercial();
-                comercial.setId(rs.getLong("id_comercial"));
-                pedido.setComercial(comercial);
+                Long idCliente = rs.getLong("id_cliente");
+                ClienteDAOImpl clienteDAO = new ClienteDAOImpl();
+                //importante si cliente existe lo setea en el pedio en caso contrario saltamos excepción
+                clienteDAO.find(idCliente).ifPresentOrElse(
+                        cliente -> pedido.setCliente(cliente),
+                        () -> { throw new RuntimeException("Pedidos: el Cliente con ID " + idCliente + " no encontrado."); }
+                );
+
+                Long idComercial = rs.getLong("id_comercial");
+                ComercialDAOImpl comercialDAO = new ComercialDAOImpl();
+                comercialDAO.find(idComercial).ifPresentOrElse(
+                        comercial -> pedido.setComercial(comercial),
+                        () -> { throw new RuntimeException("Pedidos: el comercial con ID " + idComercial + " no encontrado."); }
+                );
 
                 pedidos.add(pedido);
             }
@@ -107,20 +114,33 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
                     pedido.setId(rs.getLong("id"));
                     pedido.setTotal(rs.getBigDecimal("total"));
 
+                    // pasamos de sql.date a util.date para evitar errores
                     java.sql.Date sqlDate = rs.getDate("fecha");
                     if (sqlDate != null) {
                         pedido.setFecha(new java.util.Date(sqlDate.getTime()));
                     }
 
-                    Cliente cliente = new Cliente();
-                    cliente.setId(rs.getLong("id_cliente"));
-                    pedido.setCliente(cliente);
 
-                    Comercial comercial = new Comercial();
-                    comercial.setId(rs.getLong("id_comercial"));
-                    pedido.setComercial(comercial);
+                    Long idCliente = rs.getLong("id_cliente");
+
+                    // Utilizamos los DAOS de cliente y Comercial para rellenar los objetos
+                    ClienteDAOImpl clienteDAO = new ClienteDAOImpl();
+                    clienteDAO.find(idCliente).ifPresentOrElse(
+                            cliente -> pedido.setCliente(cliente),
+                            () -> { throw new RuntimeException("Pedidos: el Cliente con ID " + idCliente + " no encontrado."); }
+                    );
+
+
+                    Long idComercial = rs.getLong("id_comercial");
+
+                    ComercialDAOImpl comercialDAO = new ComercialDAOImpl();
+                    comercialDAO.find(idComercial).ifPresentOrElse(
+                            comercial -> pedido.setComercial(comercial),
+                            () -> { throw new RuntimeException("Pedidos: el comercial con ID " + idCliente + " no encontrado."); }
+                    );
 
                     return Optional.of(pedido);
+
                 } else {
                     return Optional.empty();
                 }

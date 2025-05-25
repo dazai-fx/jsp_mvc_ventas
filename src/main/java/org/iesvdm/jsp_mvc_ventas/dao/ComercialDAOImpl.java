@@ -1,9 +1,6 @@
 package org.iesvdm.jsp_mvc_ventas.dao;
 
-import org.iesvdm.jsp_mvc_ventas.model.Cliente;
 import org.iesvdm.jsp_mvc_ventas.model.Comercial;
-import org.iesvdm.jsp_mvc_ventas.model.Pedido;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,7 +31,7 @@ public class ComercialDAOImpl extends AbstractDAOImpl implements ComercialDAO {
             generatedId.ifPresent(id -> comercial.setId(id.longValue()));
 
         }catch (Exception e) {
-            System.err.println("Error al insertar pedido: " + e.getMessage());
+            System.err.println("Error al insertar comercial: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -86,11 +83,8 @@ public class ComercialDAOImpl extends AbstractDAOImpl implements ComercialDAO {
         WHERE id = ?
         """;
 
-        try(
-                Connection conn = connectDB();
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ) {
-
+        try(Connection conn = connectDB();
+            PreparedStatement ps = conn.prepareStatement(sql);) {
                 ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

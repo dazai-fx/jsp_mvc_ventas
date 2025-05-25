@@ -48,6 +48,35 @@ class ComercialDAOImplTest {
 
     }
 
+    @Test
+    void findComercialExistente(){
+
+        ComercialDAOImpl comercialDAO = new ComercialDAOImpl();
+
+        long idExistente = 1L;
+
+        Optional<Comercial> comercialOpt = comercialDAO.find(idExistente);
+
+        assertTrue(comercialOpt.isPresent(), "El comercial debería existir");
+
+        Comercial comercial = comercialOpt.get();
+        assertEquals(idExistente, comercial.getId());
+
+    }
+
+    @Test
+    void findComercialInexistente(){
+
+        ComercialDAOImpl comercialDAO = new ComercialDAOImpl();
+
+        Long idInexistente = 999999L;
+
+        Optional<Comercial> comercialOpt = comercialDAO.find(idInexistente);
+
+        assertTrue(comercialOpt.isEmpty(), "El Comercial no debería de existir");
+
+    }
+
 
     @Test
     void update() {
@@ -86,7 +115,6 @@ class ComercialDAOImplTest {
         // Si añades logs en el método `delete` como hiciste, puedes confirmar en consola que no se eliminó nada
 
     }
-
 
 
 }
