@@ -73,6 +73,7 @@ public abstract class AbstractDAOImpl {
 
     /**
      * Cierra la conexión y recursos JDBC (no lanza excepciones).
+     * no lo utilizo porque los try() catch ya cierran la conexión ojo no es lo mismo que try {}catch
      */
     protected void closeDb(Connection conn, Statement stmt, ResultSet rs) {
         try {
