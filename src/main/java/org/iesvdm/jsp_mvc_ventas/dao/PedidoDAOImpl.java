@@ -3,7 +3,9 @@ package org.iesvdm.jsp_mvc_ventas.dao;
 import org.iesvdm.jsp_mvc_ventas.model.Cliente;
 import org.iesvdm.jsp_mvc_ventas.model.Comercial;
 import org.iesvdm.jsp_mvc_ventas.model.Pedido;
+import org.iesvdm.jsp_mvc_ventas.model.ResumenClientesPorComercial;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +105,16 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
 
     @Override
     public Optional<Pedido> find(Long id) {
+
+        /*Puedes evitar varias llamadas a la base de datos si usas una consulta con JOIN, aunque eso depende de si prefieres delegar la carga de objetos a los DAOs individuales.
+        SELECT p.id, p.total, p.fecha,
+        c.id AS cliente_id, c.nombre AS cliente_nombre,
+        com.id AS comercial_id, com.nombre AS comercial_nombre
+        FROM pedido p
+        JOIN cliente c ON p.id_cliente = c.id
+        JOIN comercial com ON p.id_comercial = com.id
+        WHERE p.id = ?
+        * */
 
         String sql = """
         SELECT id, total, fecha, id_cliente, id_comercial 
@@ -227,5 +239,86 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
         }
 
     }
+
+    public void getAll2(){
+        List<Pedido> pedidos = new ArrayList<>();
+
+        String sql = """
+        -- language=SQL
+        SELECT id, total, fecha, id_cliente, id_comercial 
+        FROM pedido;
+        """;
+    }
+
+    public List<ResumenClientesPorComercial> getComercialXClientes(){
+        List<ResumenClientesPorComercial> resumen = new ArrayList<>();
+        String sql = """
+            -- language=SQL
+            SELECT 
+                c.id,
+                CONCAT(c.nombre, ' ', c.apellido1) AS nombre_comercial,
+                COUNT(DISTINCT p.id_cliente) AS num_clientes
+            FROM 
+                comercial c
+            JOIN 
+                pedido p ON c.id = p.id_comercial
+            GROUP BY 
+                c.id
+            ORDER BY 
+                nombre_comercial
+    """;
+
+        try (Connection conn = connectDB();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                ResumenClientesPorComercial r = new ResumenClientesPorComercial();
+                r.setId(rs.getInt("id"));
+                r.setNombre(rs.getString("nombre_comercial"));
+                r.setNumClientes(rs.getInt("num_clientes"));
+                resumen.add(r);
+            }
+        }catch (SQLException e) {
+            System.err.println("Error SQL ResumenClientesPorComercial:  " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Error al ResumenClientesPorComercial: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return resumen;
+    }
+
+    /*public List<Pedido> findByTotalBetween(BigDecimal min, BigDecimal max) {
+        List<Pedido> listaPedidos = new ArrayList<>();
+
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM pedido WHERE total BETWEEN ? AND ?")) {
+
+            ps.setBigDecimal(1, min);
+            ps.setBigDecimal(2, max);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Pedido pedido = new Pedido();
+                pedido.setId(rs.getLong("id"));
+                pedido.setFecha(rs.getDate("fecha"));
+                pedido.setTotal(rs.getBigDecimal("total"));
+
+                // Completar con cliente y comercial si lo necesitas
+                // Puedes usar joins o cargarlos después
+
+                listaPedidos.add(pedido);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return listaPedidos;
+    }*/
 
 }

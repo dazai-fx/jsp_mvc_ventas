@@ -1,6 +1,7 @@
 package org.iesvdm.jsp_mvc_ventas.dao;
 
 import org.iesvdm.jsp_mvc_ventas.model.Pedido;
+import org.iesvdm.jsp_mvc_ventas.model.ResumenClientesPorComercial;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +18,7 @@ public interface PedidoDAO {
     void update(Pedido pedido);
 
     void delete(Long id);
+
+    List<ResumenClientesPorComercial> getComercialXClientes();
 
 }

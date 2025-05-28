@@ -1,6 +1,7 @@
 <%@ page import="org.iesvdm.jsp_mvc_ventas.model.Pedido" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="org.iesvdm.jsp_mvc_ventas.model.ResumenClientesPorComercial" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -31,6 +32,30 @@
 <body>
 
 <h1>Pedidos</h1>
+
+<%
+    List<ResumenClientesPorComercial> resumenPedidos = (List<ResumenClientesPorComercial>) request.getAttribute("resumenComerciales");
+%>
+
+<%
+    for (ResumenClientesPorComercial resumen : resumenPedidos) {
+%>
+<p><%= resumen.toString() %></p>
+<%
+    }
+%>
+
+<h2>Buscador por horquilla de cantidad</h2>
+<form method="get" action="${pageContext.request.contextPath}/pedidos">
+    <label for="min">Mínimo:</label>
+    <input type="number" name="min" step="0.01" />
+
+    <label for="max">Máximo:</label>
+    <input type="number" name="max" step="0.01" />
+
+    <button type="submit">Enviar</button>
+</form>
+
 
 <table>
     <thead>
