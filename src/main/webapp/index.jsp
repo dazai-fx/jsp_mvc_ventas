@@ -5,14 +5,14 @@
   <title>JSP - Hello World</title>
   <script>
     // mandamos al usuario al jsp donde mostramos los pedidos desde js
-    window.location = "https://google.com";
+    //window.location = "https://google.com";
+    //window.location.href = "<%= request.getContextPath() %>/pedidos";
   </script>
 </head>
 <body>
 <p>Redirigiendo. Por favor, espere...</p>
 <%
-  // otra opcion es hacerlo desde Java de esta forma
-  //response.sendRedirect("fabricantes");
+  response.sendRedirect(request.getContextPath() + "/pedidos");
 %>
 </body>
 </html>

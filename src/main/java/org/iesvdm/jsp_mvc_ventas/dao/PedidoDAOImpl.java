@@ -38,7 +38,11 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
             Optional<Integer> generatedId = executeInsert(ps);
             generatedId.ifPresent(id -> pedido.setId(id.longValue()));
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            System.out.println("Error al insertar pedido "+e.getMessage());
+            e.printStackTrace();
+        }
+        catch (Exception e) {
             System.err.println("Error al insertar pedido: " + e.getMessage());
             e.printStackTrace();
         }
@@ -89,6 +93,9 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             // Podrías lanzar excepción o devolver lista vacía, según diseño
+        }catch (Exception e) {
+            System.err.println("Error inesperado al obtener lista de pedidos con id "+ e.getMessage());
+            e.printStackTrace();
         }
 
         return pedidos;
@@ -136,7 +143,7 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
                     ComercialDAOImpl comercialDAO = new ComercialDAOImpl();
                     comercialDAO.find(idComercial).ifPresentOrElse(
                             comercial -> pedido.setComercial(comercial),
-                            () -> { throw new RuntimeException("Pedidos: el comercial con ID " + idCliente + " no encontrado."); }
+                            () -> { throw new RuntimeException("Pedidos: el comercial con ID " + idComercial + " no encontrado."); }
                     );
 
                     return Optional.of(pedido);
@@ -146,6 +153,10 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }catch (Exception e) {
+            System.err.println("Error inesperado al buscar pedido con id " + id + ": " + e.getMessage());
             e.printStackTrace();
             return Optional.empty();
         }
@@ -178,7 +189,10 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
                     // Usa el método de AbstractDAOImpl para ejecutar update con validación
                     executeUpdate(ps);
 
-                } catch (Exception e){
+                } catch (SQLException e) {
+                    System.err.println("Error SQL al actualizar pedido: " + e.getMessage());
+                    e.printStackTrace();
+                }catch (Exception e){
                     System.err.println("Error al actualizar pedido: " + e.getMessage());
                     e.printStackTrace();
                 }
@@ -204,6 +218,9 @@ public class PedidoDAOImpl extends AbstractDAOImpl implements PedidoDAO {
                 System.err.println("No se eliminó ningún pedido con id: " + id);
             }
 
+        } catch (SQLException e) {
+            System.err.println("Error SQL al eliminar pedido: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
             System.err.println("Error al eliminar pedido: " + e.getMessage());
             e.printStackTrace();
